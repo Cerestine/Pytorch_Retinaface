@@ -1,0 +1,12 @@
+{
+    "train_dataset_path": "./data/widerface/train/label.txt",
+    "network": "mobile0.25",
+    "num_workers": 4,
+    "learning_rate": 1e-3,
+    "momentum": 0.9,
+    "resume_net": "None",
+    "resume_epoch": 0,
+    "weight_decay": 1e-4,
+    "gamma": 0.1,
+    "save_folder": "./weights/"
+}

@@ -1,16 +1,23 @@
+""" Development code for FaceDetection
+    Using RetinaFace from biubug6/Pytorch_Retinaface
+    
+    Development by bwchung
+    
+    Version 0.0.1 @2024.07.29
+"""
 from __future__ import print_function
 import os
-import torch
-import torch.optim as optim
-import torch.backends.cudnn as cudnn
 import argparse
-import torch.utils.data as data
-from data import WiderFaceDetection, detection_collate, preproc, cfg_mnet, cfg_re50
-from layers.modules import MultiBoxLoss
-from layers.functions.prior_box import PriorBox
 import time
 import datetime
 import math
+import torch
+from torch import optim
+from torch.backends import cudnn
+from torch.utils import data
+from data import WiderFaceDetection, detection_collate, preproc, cfg_mnet, cfg_re50
+from layers.modules import MultiBoxLoss
+from layers.functions.prior_box import PriorBox
 from models.retinaface import RetinaFace
 
 parser = argparse.ArgumentParser(description='Retinaface Training')

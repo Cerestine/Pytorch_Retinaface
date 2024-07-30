@@ -1,0 +1,13 @@
+{
+    "trained_model": "./weights/Resnet50_Final.pth",
+    "network": "resnet50",
+    "cpu": "False",
+    "confidence_threshold": 0.02,
+    "top_k": 5000,
+    "nms_threshold": 0.4,
+    "keep_top_k": 750,
+    "save_image": "True",
+    "save_folder": "/test_result",
+    "vis_thres": 0.6,
+    "source_path": "/curve/test.jpg"
+}

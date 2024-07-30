@@ -1,4 +1,4 @@
-"""Module for utilities"""
+"""Miscellaneous utility module"""
 import os
 
 def check_path(path):

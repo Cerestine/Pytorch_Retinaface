@@ -21,15 +21,12 @@ class RetinaFaceParameters():
         else:
             print("No config for backbone. Exiting app")
             sys.exit()
-        self.config_dict["name"] = net_cfg["name"]
-        self.config_dict["img_dim"] = net_cfg["image_size"]
-        self.config_dict["num_gpu"] = net_cfg["ngpu"]
-        self.config_dict["batch_size"] = net_cfg["batch_size"]
-        self.config_dict["max_epoch"] = net_cfg["epoch"]
-        self.config_dict["gpu_train"] = net_cfg["gpu_train"]
-        self.config_dict["step_dacay"] = {"decay_1": net_cfg["decay1"],
-                           "decay_2": net_cfg["decay2"]}
-        self.config_dict["loc_weight"] = net_cfg["loc_weight"]
+        for k, v in net_cfg.items():
+            if k in ["decay1", "decay2"]:
+                if "step_dacay" not in self.config_dict.keys():
+                    self.config_dict["step_dacay"] = {}
+                self.config_dict["step_dacay"][k] = v
+            self.config_dict[k]  = v
 
     def parse_json(self, config_file):
         """Parse json config file"""

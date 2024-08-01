@@ -29,7 +29,7 @@ def detect(config_file):
 
         # Initialize RetinaFace
         print("Initializing detector...")
-        detector = RetinaFaceDetector(net=net, cfg=config_data)
+        detector = RetinaFaceDetector(net=net.net, cfg=config_data)
 
         # Start inference
         print("Start detection...")

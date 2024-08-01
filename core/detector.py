@@ -76,14 +76,16 @@ class RetinaFaceDetector():
         dets = np.concatenate((dets, landms), axis=1)
         return dets
 
-    def detect(self, source, is_stream=False):
+    def detect(self, source):
         """Actual detection runner"""
         image_processor = ImageProcess()
-        image_generator = ImageStream(source, is_stream)
+        image_stream = ImageStream(source)
+        image_generator = image_stream.get_generator()
         cudnn.benchmark = True
-        while self.test_length:
+        test_count = 0
+        while self.test_length - test_count !=  0:
             # Get image from generator
-            image = image_generator.get_image()
+            image = image_generator()
 
             # Preprocess image
             input_img, im_height, im_width, scale = self._preprocess(image)
@@ -97,13 +99,21 @@ class RetinaFaceDetector():
             # NMS
             dets = self._NMS(boxes, landms, scores)
 
+            # Update test count
+            test_count += 1
+
             # Visualization
             for b in dets:
-                if b[4] < self.cfg["vis_thres"]:
-                    continue
-                b = list(map(int, b))
-                result_image = image_processor.process_image(image, b)
-            image_processor.visualize_image(result_image, self.cfg["save_folder"], self.cfg["save_image"])
+                score = b[4]
+                if score > self.cfg["vis_thres"]:
+                    b = list(map(int, b))
+                    b[4] = score
+                    image = image_processor.process_image(image, b)
+                    image_processor.visualize_image(
+                        image=image,
+                        path=self.cfg["save_folder"] + "/result_{0:04d}.jpg".format(test_count),
+                        save=self.cfg["save_image"])
+        image_processor.close_image()
 
     def export_model(self, output_name="FaceDetector"):
         """Export model to onnx format"""

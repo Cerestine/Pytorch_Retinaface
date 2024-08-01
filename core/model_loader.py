@@ -34,13 +34,11 @@ class ModelLoader():
             pretrained_dict = torch.load(pretrained_path, map_location=lambda storage, loc: storage.cuda(device))
         return pretrained_dict
 
-    def _split_prefix(self, prefix):
-        return lambda x: x.split(prefix, 1)[-1] if x.startswith(prefix) else x
-
     def _remove_prefix(self, state_dict, prefix):
         """ Old style model is stored with all names of parameters sharing common prefix "module." """
         print("remove prefix \"{}\"".format(prefix))
-        return {self._split_prefix(key): value for key, value in state_dict.items()}
+        f = lambda x: x.split(prefix, 1)[-1] if x.startswith(prefix) else x
+        return {f(key): value for key, value in state_dict.items()}
 
     def _check_keys(self, model, pretrained_state_dict):
         ckpt_keys = set(pretrained_state_dict.keys())

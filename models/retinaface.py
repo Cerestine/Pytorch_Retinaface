@@ -128,12 +128,15 @@ class RetinaFace(nn.Module):
         self.ssh2 = SSH(out_channels, out_channels)
         self.ssh3 = SSH(out_channels, out_channels)
 
+    # def _concat_tensors(self, head, features):
+    #     for i, feature in enumerate(features):
+    #         head[i](feature)
+    #     return torch.cat(head, dim=1)
+    
     def _concat_tensors(self, head, features):
-        for i, feature in enumerate(features):
-            head[i](feature)
-        return torch.cat(head, dim=1)
+        return torch.cat([head[i](feature) for i, feature in enumerate(features)], dim=1)
 
-    def make_forward(self, inputs):
+    def forward(self, inputs):
         """Make output layer"""
         out = self.body(inputs)
 

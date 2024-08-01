@@ -1,10 +1,12 @@
 """Image processing module"""
 import os
+import sys
 import cv2
 
 class ImageProcess():
     """Image processing class"""
     def __init__(self, waitkey=1000):
+        self.supported_image = ["jpg", "png", "bmp"]
         self.waitkey = waitkey
 
         # Black/white color code
@@ -20,7 +22,7 @@ class ImageProcess():
         self.cyan = (0, 255, 255)
         self.magenta = (255, 0, 255)
         self.yellow = (255, 255, 0)
-        
+
         self.face_color_code = [self.blue, self.cyan, self.magenta, self.green, self.red]
 
         # Font
@@ -31,7 +33,7 @@ class ImageProcess():
         img = None
         if os.path.exists(image_path):
             extention = image_path.split(".")[-1]
-            if extention in ["jpg", "png", "bmp"]:
+            if extention in self.supported_image:
                 img = cv2.imread(image_path, cv2.IMREAD_COLOR)
             else:
                 print("Not supported image type!!!")
@@ -42,7 +44,7 @@ class ImageProcess():
     def show_image(self, image):
         """Show image"""
         cv2.imshow("Result", image)
-        k = cv2.waitkey(self.waitkey)
+        k = cv2.waitKey(self.waitkey)
         return  k
 
     def save_image(self, image, path):
@@ -51,7 +53,7 @@ class ImageProcess():
 
     def close_image(self):
         """Close image"""
-        cv2.destroyAllWindow()
+        cv2.destroyAllWindows()
 
     def insert_text(self, image, b):
         """Draw rectangle on image"""
@@ -66,7 +68,7 @@ class ImageProcess():
 
     def draw_circle(self, image, b1, b2, color):
         """Draw rectangle on image"""
-        return cv2.circle(image, (b1, b2, 1, color, 4))
+        return cv2.circle(image, (b1, b2), 1, color, 4)
 
     def process_image(self, image, b):
         """Process image"""
@@ -81,37 +83,47 @@ class ImageProcess():
         k = self.show_image(image)
         if k == ord('s') or save:
             self.save_image(image, path)
-        self.close_image()
 
 class ImageStream():
     """Image stream processing class"""
-    def __init__(self, path, is_stream=False):
-        self.is_stream = is_stream
+    def __init__(self, path):
+        self.supported_video = ["mp4", "avi"]
+        self.supported_image = ["jpg", "png", "bmp"]
+        self.index = 0
         self.path = path
         self.image_process = ImageProcess()
-        self._init_stream()
-        self.image_generator = self._get_generator()
+        self.is_stream = self._is_stream()
+        self.init_stream()
 
-    def _init_stream(self):
-        self.open_stream()
+    def _is_stream(self):
+        if os.path.isfile(self.path):
+            extention = self.path.split(".")[-1]
+            if extention in self.supported_image:
+                return False
+            elif extention in self.supported_video:
+                return True
+            else:
+                print("Unsupported image type!")
+                sys.exit()
+        else:
+            return True
 
-    def _read_stream(self):
+    def read_stream(self):
         """Read and return image from stream"""
         ret, frame = self.stream.read()
         if not ret:
             frame = None
-        yield frame
+        return frame
 
-    def _read_image(self):
+    def read_image(self):
         """Read and return image"""
-        for img_path in self.stream:
-            yield self.image_process.read_image(img_path)
-
-    def _get_generator(self):
-        if self.is_stream:
-            return self._read_stream
+        if self.index < len(self.stream):
+            img_path = self.stream[self.index]
+            image = self.image_process.read_image(img_path)
+            self.index += 1
         else:
-            return self._read_image
+            image = None
+        return image
 
     def _open_videocap(self):
         """Open video stream"""
@@ -124,15 +136,16 @@ class ImageStream():
     def _get_image_path(self):
         """Get image paths"""
         self.stream = []
-        if isinstance(self.path, list):
-            file_list = os.listdir()
-            for file_path in file_list:
-                if os.path.isfile(file_path):
-                    self.stream.append(file_path)
-        else:
-            self.stream = [self.path]
+        if not isinstance(self.path, list):
+            if self.path.split(".")[-1] in self.supported_image:
+                self.stream = [self.path]
+            else:
+                file_list = os.listdir()
+        for file_path in file_list:
+            if os.path.isfile(file_path):
+                self.stream.append(file_path)
 
-    def open_stream(self):
+    def init_stream(self):
         """Open image stream"""
         if self.is_stream:
             self._open_videocap()
@@ -144,6 +157,9 @@ class ImageStream():
         if self.is_stream:
             self.stream.release()
 
-    def get_image(self):
-        """Return image"""
-        return next(self.image_generator)
+    def get_generator(self):
+        """Get image generator"""
+        if self.is_stream:
+            return self.read_stream
+        else:
+            return self.read_image

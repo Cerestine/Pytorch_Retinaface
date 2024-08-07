@@ -55,10 +55,12 @@ class RetinaFaceTrainer():
             self.config_data["step_dacay"]["decay_2"] * epoch_size)
         step_index = 0
 
-        if resume_epoch > 0:
-            start_iter = resume_epoch * epoch_size
-        else:
-            start_iter = 0
+        # if resume_epoch > 0:
+        #     start_iter = resume_epoch * epoch_size
+        # else:
+        #     start_iter = 0
+
+        start_iter = resume_epoch * epoch_size if resume_epoch > 0 else 0
 
         for iteration in range(start_iter, max_iter):
             if iteration % epoch_size == 0:
@@ -94,11 +96,13 @@ class RetinaFaceTrainer():
             load_t1 = time.time()
             batch_time = load_t1 - load_t0
             eta = int(batch_time * (max_iter - iteration))
-            print('Epoch:{}/{} || Epochiter: {}/{} || Iter: {}/{} || Loc: {:.4f} Cla: {:.4f} Landm: {:.4f} || LR: {:.8f} || Batchtime: {:.4f} s || ETA: {}'
-                .format(epoch, self.config_data["max_epoch"], (iteration % epoch_size) + 1,
-                epoch_size, iteration + 1, max_iter, 
-                loss_l.item(), loss_c.item(), loss_landm.item(), 
-                lr, batch_time, str(datetime.timedelta(seconds=eta))))
+            print("Epoch:{}/{} || Epochiter: {}/{} || Iter: {}/{}\n".format(
+                epoch, self.config_data["max_epoch"],
+                (iteration % epoch_size) + 1, epoch_size,
+                iteration + 1, max_iter))
+            print("Loc: {:.4f} Cla: {:.4f} Landm: {:.4f} || LR: {:.8f}\nBatchtime: {:.4f} s || ETA: {}".format(
+                loss_l.item(), loss_c.item(), loss_landm.item(), lr,
+                batch_time, str(datetime.timedelta(seconds=eta))))
 
         torch.save(self.net.state_dict(), self.config_data["save_folder"] + self.config_data["name"] + '_Final.pth')
         # torch.save(net.state_dict(), save_folder + 'Final_Retinaface.pth')

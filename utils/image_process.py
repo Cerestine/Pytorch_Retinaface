@@ -56,7 +56,7 @@ class ImageProcess():
         cv2.destroyAllWindows()
 
     def insert_text(self, image, b):
-        """Draw rectangle on image"""
+        """Insert text on image"""
         cx = b[0]
         cy = b[1] + 12
         text = "{:.4f}".format(b[4])
@@ -99,14 +99,15 @@ class ImageStream():
         if os.path.isfile(self.path):
             extention = self.path.split(".")[-1]
             if extention in self.supported_image:
-                return False
+                result = False
             elif extention in self.supported_video:
-                return True
+                result = True
             else:
                 print("Unsupported image type!")
                 sys.exit()
         else:
-            return True
+            result = True
+        return result
 
     def read_stream(self):
         """Read and return image from stream"""
@@ -141,16 +142,17 @@ class ImageStream():
                 self.stream = [self.path]
             else:
                 file_list = os.listdir()
-        for file_path in file_list:
-            if os.path.isfile(file_path):
-                self.stream.append(file_path)
+                for file_path in file_list:
+                    if os.path.isfile(file_path):
+                        self.stream.append(file_path)
 
     def init_stream(self):
         """Open image stream"""
-        if self.is_stream:
-            self._open_videocap()
-        else:
-            self._get_image_path()
+        # if self.is_stream:
+        #     self._open_videocap()
+        # else:
+        #     self._get_image_path()
+        self._open_videocap() if self.is_stream else self._get_image_path()
 
     def close_stream(self):
         """Close image stream"""
@@ -159,7 +161,9 @@ class ImageStream():
 
     def get_generator(self):
         """Get image generator"""
-        if self.is_stream:
-            return self.read_stream
-        else:
-            return self.read_image
+        # if self.is_stream:
+        #     return self.read_stream
+        # else:
+        #     return self.read_image
+        generator =self.read_stream if self.is_stream else self.read_image
+        return generator
